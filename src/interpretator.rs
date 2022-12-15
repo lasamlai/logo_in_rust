@@ -80,50 +80,50 @@ impl Context {
     }
 }
 
-pub enum ExpReturn {
+pub enum ExpResult {
     Exit(Value),
-    Result(Value),
+    Outcome(Value),
 }
 
-impl ExpReturn {
-    fn and_then<F: FnOnce(Value) -> ExpReturn>(self, f: F) -> ExpReturn {
+impl ExpResult {
+    fn and_then<F: FnOnce(Value) -> ExpResult>(self, f: F) -> ExpResult {
         match self {
-            ExpReturn::Result(x) => f(x),
+            ExpResult::Outcome(x) => f(x),
             exit => exit,
         }
     }
 
-    fn exp_return(self) -> ExpReturn {
+    fn exp_return(self) -> ExpResult {
         match self {
-            ExpReturn::Exit(v) => ExpReturn::Result(v),
+            ExpResult::Exit(v) => ExpResult::Outcome(v),
             res => res,
         }
     }
 }
 
-fn interete_exp(ctx: &mut Context, exp: Exp) -> ExpReturn {
+fn interete_exp(ctx: &mut Context, exp: Exp) -> ExpResult {
     use crate::parser::Exp::*;
     match exp {
         Oper(m, e1, e2) => interete_exp(ctx, *e1).and_then(|x| {
             interete_exp(ctx, *e2).and_then(|y| match m {
-                OP::Sub => ExpReturn::Result(x - y),
-                OP::Mul => ExpReturn::Result(x * y),
-                OP::Div => ExpReturn::Result(x / y),
-                OP::Le => ExpReturn::Result(Bool(x < y)),
+                OP::Sub => ExpResult::Outcome(x - y),
+                OP::Mul => ExpResult::Outcome(x * y),
+                OP::Div => ExpResult::Outcome(x / y),
+                OP::Le => ExpResult::Outcome(Bool(x < y)),
             })
         }),
         Call(pr, args) => interpretr_call(ctx, pr, args),
-        Const(v) => ExpReturn::Result(v.clone()),
-        Var(s) => ExpReturn::Result(ctx.vars.get(&s).cloned().unwrap()),
+        Const(v) => ExpResult::Outcome(v.clone()),
+        Var(s) => ExpResult::Outcome(ctx.vars.get(&s).cloned().unwrap()),
     }
 }
 
-fn interprete_run(ctx: &mut Context, code: Value) -> ExpReturn {
+fn interprete_run(ctx: &mut Context, code: Value) -> ExpResult {
     let code = code.to_list().join(" ");
     interete(ctx, &mut StackIter::wrap(code.split(" ")))
 }
 
-fn interpretr_proc(ctx: &mut Context, proc: Procedure, vals: VecDeque<Value>) -> ExpReturn {
+fn interpretr_proc(ctx: &mut Context, proc: Procedure, vals: VecDeque<Value>) -> ExpResult {
     let argv: Vec<String> = proc.get_argv();
     let vals: Vec<(String, Value)> = zip(argv.clone(), vals).collect();
 
@@ -152,17 +152,17 @@ fn interpretr_proc(ctx: &mut Context, proc: Procedure, vals: VecDeque<Value>) ->
     return res.exp_return();
 }
 
-fn interpretr_call(ctx: &mut Context, pr: String, args: Vec<Exp>) -> ExpReturn {
+fn interpretr_call(ctx: &mut Context, pr: String, args: Vec<Exp>) -> ExpResult {
     let mut vals: VecDeque<Value> = VecDeque::new();
     for e in args.into_iter() {
         match interete_exp(ctx, e) {
-            ExpReturn::Exit(v) => return ExpReturn::Exit(v),
-            ExpReturn::Result(r) => vals.push_back(r),
+            ExpResult::Exit(v) => return ExpResult::Exit(v),
+            ExpResult::Outcome(r) => vals.push_back(r),
         }
     }
     match &pr[..] {
-        "stop" => return ExpReturn::Exit(Value::Void),
-        "output" => return ExpReturn::Exit(vals.pop_front().unwrap()),
+        "stop" => return ExpResult::Exit(Value::Void),
+        "output" => return ExpResult::Exit(vals.pop_front().unwrap()),
         _ => (),
     }
     match &pr[..] {
@@ -188,19 +188,19 @@ fn interpretr_call(ctx: &mut Context, pr: String, args: Vec<Exp>) -> ExpReturn {
         "showturtle" | "st" => println!("Show the turtle!"),
         "pick" => {
             let vs: Vec<String> = vals.pop_front().unwrap().to_list();
-            return ExpReturn::Result(Value::Str(
+            return ExpResult::Outcome(Value::Str(
                 vs.choose(&mut rand::thread_rng()).unwrap().clone(),
             ));
         }
         "random" => {
             let n: i32 = vals.pop_front().unwrap().to_num() as i32;
-            return ExpReturn::Result(Value::Num(rand::thread_rng().gen_range(0..n) as f32));
+            return ExpResult::Outcome(Value::Num(rand::thread_rng().gen_range(0..n) as f32));
         }
         "sentence" => {
             let mut l1 = vals.pop_front().unwrap().to_list();
             let mut l2 = vals.pop_front().unwrap().to_list();
             l1.append(&mut l2);
-            return ExpReturn::Result(Value::List(l1));
+            return ExpResult::Outcome(Value::List(l1));
         }
         "pr" | "print" => {
             println!("{}", vals[0]);
@@ -215,8 +215,8 @@ fn interpretr_call(ctx: &mut Context, pr: String, args: Vec<Exp>) -> ExpReturn {
             for i in 0..num {
                 ctx.vars.insert("repcount".to_string(), Num(i as f32));
                 let v = interprete_run(ctx, code.clone());
-                if let ExpReturn::Exit(res) = v {
-                    return ExpReturn::Exit(res);
+                if let ExpResult::Exit(res) = v {
+                    return ExpResult::Exit(res);
                 }
             }
         }
@@ -240,32 +240,21 @@ fn interpretr_call(ctx: &mut Context, pr: String, args: Vec<Exp>) -> ExpReturn {
             return interpretr_proc(ctx, proc, vals);
         }
     };
-    ExpReturn::Result(Value::Void)
+    ExpResult::Outcome(Value::Void)
 }
 
-fn interete_proc(ctx: &mut Context, exp: Exp) -> ExpReturn {
-    use crate::parser::Exp::*;
-    match exp {
-        Call(pr, args) => interpretr_call(ctx, pr, args),
-        exp => {
-            interete_exp(ctx, exp);
-            ExpReturn::Result(Value::Void)
-        }
-    }
-}
-
-fn interete(ctx: &mut Context, iter: &mut StackIter) -> ExpReturn {
+fn interete(ctx: &mut Context, iter: &mut StackIter) -> ExpResult {
     loop {
         match parse_statement(&ctx.signs, iter) {
-            None => return ExpReturn::Result(Value::Void),
+            None => return ExpResult::Outcome(Value::Void),
             Some(Stat::ProcDef(proc)) => {
                 ctx.signs.insert(proc.get_name(), proc.signature());
                 ctx.procs.insert(proc.get_name(), proc);
             }
-            Some(Stat::Exp(e)) => match interete_proc(ctx, e) {
-                ExpReturn::Result(Value::Void) => continue,
-                ExpReturn::Result(v) => panic!("Don't know what to do with {}", v),
-                ExpReturn::Exit(v) => return ExpReturn::Exit(v),
+            Some(Stat::Exp(e)) => match interete_exp(ctx, e) {
+                ExpResult::Outcome(Value::Void) => continue,
+                ExpResult::Outcome(v) => panic!("Don't know what to do with {}", v),
+                ExpResult::Exit(v) => return ExpResult::Exit(v),
             },
         }
     }

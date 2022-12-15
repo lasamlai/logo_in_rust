@@ -1,0 +1,17 @@
+To p
+  print g f 1 2
+end
+to f :x
+  output :x * 10
+end
+to g :x :y
+  output :x + :y
+end
+p
+to f
+  output 404
+end
+to g :x :y :z
+  output :x + :y + :z
+end
+p

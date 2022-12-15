@@ -1,0 +1,5 @@
+to f
+  output [pr 10]
+end
+pr f
+repeat 10 f

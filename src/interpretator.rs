@@ -80,7 +80,7 @@ impl Context {
     }
 }
 
-pub enum ExpResult {
+enum ExpResult {
     Exit(Value),
     Outcome(Value),
 }

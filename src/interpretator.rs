@@ -2,10 +2,10 @@ use crate::interpretator::Value::*;
 use crate::parser::parse_statement;
 use crate::parser::Exp;
 use crate::parser::Procedure;
-use crate::parser::StackIter;
 use crate::parser::Stat;
 use crate::parser::OP;
 use crate::robot::Robot;
+use crate::unsee::Unsee;
 use rand::seq::SliceRandom;
 use rand::Rng;
 use std::collections::HashMap;
@@ -120,7 +120,7 @@ fn interete_exp(ctx: &mut Context, exp: Exp) -> ExpResult {
 
 fn interprete_run(ctx: &mut Context, code: Value) -> ExpResult {
     let code = code.to_list().join(" ");
-    interete(ctx, &mut StackIter::wrap(code.split(" ")))
+    interete(ctx, &mut Unsee::wrap(code.split(" ")))
 }
 
 fn interpretr_proc(ctx: &mut Context, proc: Procedure, vals: VecDeque<Value>) -> ExpResult {
@@ -139,7 +139,7 @@ fn interpretr_proc(ctx: &mut Context, proc: Procedure, vals: VecDeque<Value>) ->
     vals.into_iter().for_each(|(name, val)| {
         ctx.vars.insert(name.to_string(), val);
     });
-    let res = interete(ctx, &mut StackIter::wrap(proc.get_body().split(" ")));
+    let res = interete(ctx, &mut Unsee::wrap(proc.get_body().split(" ")));
 
     //restore vars
     save.into_iter().for_each(|(k, o)| {
@@ -243,7 +243,10 @@ fn interpretr_call(ctx: &mut Context, pr: String, args: Vec<Exp>) -> ExpResult {
     ExpResult::Outcome(Value::Void)
 }
 
-fn interete(ctx: &mut Context, iter: &mut StackIter) -> ExpResult {
+fn interete<'a, T: Iterator<Item = &'a str>>(
+    ctx: &mut Context,
+    iter: &mut Unsee<&'a str, T>,
+) -> ExpResult {
     loop {
         match parse_statement(&ctx.signs, iter) {
             None => return ExpResult::Outcome(Value::Void),
@@ -262,6 +265,6 @@ fn interete(ctx: &mut Context, iter: &mut StackIter) -> ExpResult {
 
 pub fn inter(data: String) -> svg::Document {
     let mut ctx = Context::new();
-    interete(&mut ctx, &mut StackIter::wrap(data.split(" ")));
+    interete(&mut ctx, &mut Unsee::wrap(data.split(" ")));
     ctx.plot()
 }

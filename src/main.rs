@@ -7,6 +7,7 @@ mod interpretator;
 mod parser;
 mod robot;
 mod tokenizer;
+mod unsee;
 
 fn main() {
     let args: Vec<String> = env::args().collect();

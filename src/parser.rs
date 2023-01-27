@@ -24,11 +24,9 @@ fn get_value(txt: &str) -> Option<Exp> {
     if txt == "repcount" || txt == "#" {
         return Some(Var("repcount".to_string()));
     }
-    if txt.chars().next().unwrap() == ':' {
-        let name = &txt[1..].to_string();
+    if let Some(name) = txt.strip_prefix(':') {
         Some(Var(name.to_string()))
-    } else if txt.chars().next().unwrap() == '"' {
-        let name = &txt[1..].to_string();
+    } else if let Some(name) = txt.strip_prefix('"') {
         Some(Const(Value::Str(name.to_string())))
     } else {
         match txt.parse() {
@@ -206,8 +204,7 @@ fn procedure_args<'a, T: Iterator<Item = &'a str>>(iter: &mut Unsee<&'a str, T>)
     let mut vars = vec![];
     loop {
         let txt = iter.next().unwrap();
-        if txt.chars().next().unwrap() == ':' {
-            let name = &txt[1..].to_string();
+        if let Some(name) = txt.strip_prefix(':') {
             vars.push(name.to_string());
         } else {
             iter.unsee(txt);

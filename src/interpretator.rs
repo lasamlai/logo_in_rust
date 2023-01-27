@@ -120,7 +120,7 @@ fn interete_exp(ctx: &mut Context, exp: Exp) -> ExpResult {
 
 fn interprete_run(ctx: &mut Context, code: Value) -> ExpResult {
     let code = code.to_list().join(" ");
-    interete(ctx, &mut Unsee::wrap(code.split(" ")))
+    interete(ctx, &mut Unsee::wrap(code.split(' ')))
 }
 
 fn interpretr_proc(ctx: &mut Context, proc: Procedure, vals: VecDeque<Value>) -> ExpResult {
@@ -139,7 +139,7 @@ fn interpretr_proc(ctx: &mut Context, proc: Procedure, vals: VecDeque<Value>) ->
     vals.into_iter().for_each(|(name, val)| {
         ctx.vars.insert(name.to_string(), val);
     });
-    let res = interete(ctx, &mut Unsee::wrap(proc.get_body().split(" ")));
+    let res = interete(ctx, &mut Unsee::wrap(proc.get_body().split(' ')));
 
     //restore vars
     save.into_iter().for_each(|(k, o)| {
@@ -265,6 +265,6 @@ fn interete<'a, T: Iterator<Item = &'a str>>(
 
 pub fn inter(data: String) -> svg::Document {
     let mut ctx = Context::new();
-    interete(&mut ctx, &mut Unsee::wrap(data.split(" ")));
+    interete(&mut ctx, &mut Unsee::wrap(data.split(' ')));
     ctx.plot()
 }

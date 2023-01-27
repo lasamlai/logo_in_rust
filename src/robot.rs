@@ -34,10 +34,7 @@ impl Robot {
     pub fn forward(&mut self, m: f32) {
         let x: f32 = self.angle.cos() * m;
         let y: f32 = self.angle.sin() * m;
-        self.data = match self.data.clone() {
-            Some(d) => Some(d.line_by((x, y)).clone()),
-            None => None,
-        };
+        self.data = self.data.take().map(|d| d.line_by((x, y)));
         self.x += x;
         self.y += y;
     }

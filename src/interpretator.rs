@@ -113,7 +113,7 @@ fn interete_exp(ctx: &mut Context, exp: Exp) -> ExpResult {
             })
         }),
         Call(pr, args) => interpretr_call(ctx, pr, args),
-        Const(v) => ExpResult::Outcome(v.clone()),
+        Const(v) => ExpResult::Outcome(v),
         Var(s) => ExpResult::Outcome(ctx.vars.get(&s).cloned().unwrap()),
     }
 }

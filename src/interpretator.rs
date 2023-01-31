@@ -239,7 +239,7 @@ fn interpretr_call(ctx: &mut Context, pr: String, args: Vec<Exp>) -> ExpResult {
                 .procs
                 .get(s)
                 .cloned()
-                .expect(&format!("Unknowc command: {}", s));
+                .unwrap_or_else(|| panic!("Unknown command: {}", s));
             return interpretr_proc(ctx, proc, vals);
         }
     };

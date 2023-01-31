@@ -78,6 +78,25 @@ impl Context {
 
         signs
     }
+
+    fn keep_values_out_of_context(&mut self, names: Vec<String>) -> Vec<(String, Option<Value>)> {
+        names
+            .into_iter()
+            .map(|k| {
+                let v = self.vars.remove(&k);
+                (k, v)
+            })
+            .collect()
+    }
+
+    fn restore_values_from_context(&mut self, backup: Vec<(String, Option<Value>)>) {
+        backup.into_iter().for_each(|(k, o)| {
+            match o {
+                Some(o) => self.vars.insert(k, o),
+                None => self.vars.remove(&k),
+            };
+        });
+    }
 }
 
 enum ExpResult {
@@ -125,31 +144,15 @@ fn interprete_run(ctx: &mut Context, code: Value) -> ExpResult {
 
 fn interpretr_proc(ctx: &mut Context, proc: Procedure, vals: VecDeque<Value>) -> ExpResult {
     let argv: Vec<String> = proc.get_argv();
-    let vals: Vec<(String, Value)> = zip(argv.clone(), vals).collect();
+    let save = ctx.keep_values_out_of_context(argv.clone());
 
-    // save vars
-    let save: Vec<(String, Option<Value>)> = argv
-        .into_iter()
-        .map(|k| {
-            let v = ctx.vars.get(&k).cloned();
-            (k, v)
-        })
-        .collect();
-
-    vals.into_iter().for_each(|(name, val)| {
-        ctx.vars.insert(name.to_string(), val);
+    zip(argv, vals).for_each(|(name, val)| {
+        ctx.vars.insert(name, val);
     });
     let res = interete(ctx, &mut Unsee::wrap(proc.get_body().split(' ')));
 
-    //restore vars
-    save.into_iter().for_each(|(k, o)| {
-        match o {
-            Some(o) => ctx.vars.insert(k, o),
-            None => ctx.vars.remove(&k),
-        };
-    });
-
-    return res.exp_return();
+    ctx.restore_values_from_context(save);
+    res.exp_return()
 }
 
 fn interpretr_call(ctx: &mut Context, pr: String, args: Vec<Exp>) -> ExpResult {

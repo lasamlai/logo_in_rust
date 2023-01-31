@@ -38,9 +38,9 @@ fn get_value(txt: &str) -> Option<Exp> {
 
 #[derive(Clone)]
 enum ExpState {
-    ExpNone,
-    ExpVal(Exp),
-    ExpOp(Exp, OP),
+    Empty,
+    Val(Exp),
+    Op(Exp, OP),
 }
 
 struct ExpParser {
@@ -50,23 +50,23 @@ struct ExpParser {
 impl ExpParser {
     fn new() -> ExpParser {
         ExpParser {
-            state: ExpState::ExpNone,
+            state: ExpState::Empty,
         }
     }
 
     fn can_eat_val(&self) -> bool {
         use ExpState::*;
         match self.state {
-            ExpNone | ExpOp(_, _) => true,
-            ExpVal(_) => false,
+            Empty | Op(_, _) => true,
+            Val(_) => false,
         }
     }
 
     fn shift_op(&mut self, op: OP) -> bool {
         use ExpState::*;
         match self.state.clone() {
-            ExpVal(v) => {
-                self.state = ExpOp(v, op);
+            Val(v) => {
+                self.state = Op(v, op);
                 true
             }
             _ => false,
@@ -76,12 +76,12 @@ impl ExpParser {
     fn shift_val(&mut self, rhs: Exp) -> bool {
         use ExpState::*;
         match self.state.clone() {
-            ExpNone => {
-                self.state = ExpVal(rhs);
+            Empty => {
+                self.state = Val(rhs);
                 true
             }
-            ExpOp(v, op) => {
-                self.state = ExpVal(Oper(op, Box::new(v), Box::new(rhs)));
+            Op(v, op) => {
+                self.state = Val(Oper(op, Box::new(v), Box::new(rhs)));
                 true
             }
             _ => false,
@@ -91,9 +91,9 @@ impl ExpParser {
     fn get_value(self) -> Exp {
         use ExpState::*;
         match self.state {
-            ExpVal(v) => v,
-            ExpNone => panic!("I do not have value!"),
-            ExpOp(_, _) => panic!("Expected second argument"),
+            Val(v) => v,
+            Empty => panic!("I do not have value!"),
+            Op(_, _) => panic!("Expected second argument"),
         }
     }
 }

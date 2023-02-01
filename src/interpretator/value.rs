@@ -52,10 +52,15 @@ impl From<f32> for Value {
 impl TryFrom<Value> for f32 {
     type Error = String;
     fn try_from(v: Value) -> Result<f32, String> {
-        if let Num(n) = v {
-            Ok(n)
-        } else {
-            Err("Type error: It is not a number!".to_string())
+        match v {
+            Str(s) => match s.parse() {
+                Ok(n) => Ok(n),
+                Err(_) => Err("Expected number".to_string()),
+            },
+            Num(n) => Ok(n),
+            Bool(true) => Ok(1.),
+            Bool(false) => Ok(0.),
+            _ => Err("Type error: It is not a number!".to_string()),
         }
     }
 }
@@ -72,7 +77,7 @@ impl TryFrom<Value> for bool {
         if let Bool(b) = v {
             Ok(b)
         } else {
-            Err("Type error: It is not a boolean!".to_string())
+            v.try_into().map(|n: f32| n == 0.)
         }
     }
 }

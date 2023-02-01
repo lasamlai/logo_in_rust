@@ -14,14 +14,6 @@ pub enum Value {
 }
 
 impl Value {
-    pub fn to_string(self) -> String {
-        if let Str(s) = self {
-            s
-        } else {
-            panic!("Expect String!")
-        }
-    }
-
     pub fn to_num(self) -> f32 {
         if let Num(s) = self {
             s

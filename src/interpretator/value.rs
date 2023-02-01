@@ -71,7 +71,7 @@ impl From<bool> for Value {
 impl TryFrom<Value> for bool {
     type Error = String;
     fn try_from(v: Value) -> Result<bool, String> {
-        v.try_into().map(|n: f32| n == 0.)
+        v.try_into().map(|n: f32| n != 0.)
     }
 }
 

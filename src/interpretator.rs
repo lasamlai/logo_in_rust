@@ -128,7 +128,7 @@ fn interete_exp(ctx: &mut Context, exp: Exp) -> ExpResult {
                 OP::Sub => ExpResult::Outcome(x - y),
                 OP::Mul => ExpResult::Outcome(x * y),
                 OP::Div => ExpResult::Outcome(x / y),
-                OP::Le => ExpResult::Outcome(Bool(x < y)),
+                OP::Le => ExpResult::Outcome(Value::from(x < y)),
             })
         }),
         Call(pr, args) => interpretr_call(ctx, pr, args),

@@ -8,7 +8,6 @@ use Value::*;
 pub enum Value {
     Str(String),
     Num(f32),
-    Bool(bool),
     List(Vec<String>),
     Void,
 }
@@ -58,8 +57,6 @@ impl TryFrom<Value> for f32 {
                 Err(_) => Err("Expected number".to_string()),
             },
             Num(n) => Ok(n),
-            Bool(true) => Ok(1.),
-            Bool(false) => Ok(0.),
             _ => Err("Type error: It is not a number!".to_string()),
         }
     }
@@ -67,18 +64,14 @@ impl TryFrom<Value> for f32 {
 
 impl From<bool> for Value {
     fn from(value: bool) -> Value {
-        Bool(value)
+        Num(if value { 1. } else { 0. })
     }
 }
 
 impl TryFrom<Value> for bool {
     type Error = String;
     fn try_from(v: Value) -> Result<bool, String> {
-        if let Bool(b) = v {
-            Ok(b)
-        } else {
-            v.try_into().map(|n: f32| n == 0.)
-        }
+        v.try_into().map(|n: f32| n == 0.)
     }
 }
 
@@ -104,7 +97,6 @@ impl Display for Value {
         match self {
             Str(s) => formatter.write_fmt(format_args!("{}", s)),
             Num(n) => formatter.write_fmt(format_args!("{}", n)),
-            Bool(b) => formatter.write_fmt(format_args!("{}", b)),
             List(l) => formatter.write_fmt(format_args!("[ {} ]", l.join(" "))),
             Void => formatter.write_fmt(format_args!("Void")),
         }

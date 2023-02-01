@@ -14,14 +14,6 @@ pub enum Value {
 }
 
 impl Value {
-    pub fn to_num(self) -> f32 {
-        if let Num(s) = self {
-            s
-        } else {
-            panic!("Expect Number!")
-        }
-    }
-
     pub fn to_bool(self) -> bool {
         if let Bool(s) = self {
             s
@@ -65,6 +57,23 @@ impl Div for Value {
         match (self, rhs) {
             (Num(a), Num(b)) => Num(a / b),
             _ => panic!(),
+        }
+    }
+}
+
+impl From<f32> for Value {
+    fn from(value: f32) -> Value {
+        Num(value)
+    }
+}
+
+impl TryFrom<Value> for f32 {
+    type Error = String;
+    fn try_from(v: Value) -> Result<f32, String> {
+        if let Num(n) = v {
+            Ok(n)
+        } else {
+            Err("Type error: It is not a number!".to_string())
         }
     }
 }

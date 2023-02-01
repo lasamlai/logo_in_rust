@@ -169,18 +169,44 @@ fn interpretr_call(ctx: &mut Context, pr: String, args: Vec<Exp>) -> ExpResult {
         _ => (),
     }
     match &pr[..] {
-        "fd" | "forward" => ctx.robot.forward(vals.pop_front().unwrap().to_num()),
-        "bk" | "back" => ctx.robot.back(vals.pop_front().unwrap().to_num()),
-        "rt" | "right" => ctx
-            .robot
-            .right(vals.pop_front().unwrap().to_num() * PI / 180.0),
-        "lt" | "left" => ctx
-            .robot
-            .left(vals.pop_front().unwrap().to_num() * PI / 180.0),
+        "fd" | "forward" => ctx.robot.forward(
+            vals.pop_front()
+                .unwrap()
+                .try_into()
+                .expect("Expected number!"),
+        ),
+        "bk" | "back" => ctx.robot.back(
+            vals.pop_front()
+                .unwrap()
+                .try_into()
+                .expect("Expected number!"),
+        ),
+        "rt" | "right" => {
+            let d: f32 = vals
+                .pop_front()
+                .unwrap()
+                .try_into()
+                .expect("Expected number!");
+            ctx.robot.right(d * PI / 180.0)
+        }
+
+        "lt" | "left" => {
+            let d: f32 = vals
+                .pop_front()
+                .unwrap()
+                .try_into()
+                .expect("Expected number!");
+            ctx.robot.left(d * PI / 180.0)
+        }
         "setcolor" | "setpencolor" => ctx.robot.setpencolor(vals.pop_front().unwrap().to_string()),
         "home" => ctx.robot.home(),
         "label" => ctx.robot.label(vals.pop_front().unwrap().to_string()),
-        "setlabelheight" => ctx.robot.setlabelheight(vals.pop_front().unwrap().to_num()),
+        "setlabelheight" => ctx.robot.setlabelheight(
+            vals.pop_front()
+                .unwrap()
+                .try_into()
+                .expect("Expected number!"),
+        ),
         "penup" | "pu" => ctx.robot.penup(),
         "pendown" | "pd" => ctx.robot.pendown(),
         "wait" => println!("wait {:?}", vals.pop_front().unwrap()),
@@ -196,7 +222,12 @@ fn interpretr_call(ctx: &mut Context, pr: String, args: Vec<Exp>) -> ExpResult {
             ));
         }
         "random" => {
-            let n: i32 = vals.pop_front().unwrap().to_num() as i32;
+            let n: f32 = vals
+                .pop_front()
+                .unwrap()
+                .try_into()
+                .expect("Expected number!");
+            let n: i32 = n as i32;
             return ExpResult::Outcome(Value::Num(rand::thread_rng().gen_range(0..n) as f32));
         }
         "sentence" => {
@@ -213,7 +244,12 @@ fn interpretr_call(ctx: &mut Context, pr: String, args: Vec<Exp>) -> ExpResult {
         }
 
         "repeat" => {
-            let num = vals.pop_front().unwrap().to_num() as i32;
+            let num: f32 = vals
+                .pop_front()
+                .unwrap()
+                .try_into()
+                .expect("Expected number!");
+            let num: i32 = num as i32;
             let code = vals.pop_front().unwrap();
             for i in 0..num {
                 ctx.vars.insert("repcount".to_string(), Num(i as f32));

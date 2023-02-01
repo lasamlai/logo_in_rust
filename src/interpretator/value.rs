@@ -14,14 +14,6 @@ pub enum Value {
 }
 
 impl Value {
-    pub fn to_bool(self) -> bool {
-        if let Bool(s) = self {
-            s
-        } else {
-            panic!("Expect Boolean!")
-        }
-    }
-
     pub fn to_list(self) -> Vec<String> {
         if let List(s) = self {
             s
@@ -74,6 +66,23 @@ impl TryFrom<Value> for f32 {
             Ok(n)
         } else {
             Err("Type error: It is not a number!".to_string())
+        }
+    }
+}
+
+impl From<bool> for Value {
+    fn from(value: bool) -> Value {
+        Bool(value)
+    }
+}
+
+impl TryFrom<Value> for bool {
+    type Error = String;
+    fn try_from(v: Value) -> Result<bool, String> {
+        if let Bool(b) = v {
+            Ok(b)
+        } else {
+            Err("Type error: It is not a boolean!".to_string())
         }
     }
 }

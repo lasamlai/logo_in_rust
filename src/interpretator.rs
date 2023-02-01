@@ -260,7 +260,11 @@ fn interpretr_call(ctx: &mut Context, pr: String, args: Vec<Exp>) -> ExpResult {
             }
         }
         "if" => {
-            let que = vals.pop_front().unwrap().to_bool();
+            let que = vals
+                .pop_front()
+                .unwrap()
+                .try_into()
+                .expect("Expected boolean!");
             let code = vals.pop_front().unwrap();
             if que {
                 return interprete_run(ctx, code);

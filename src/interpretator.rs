@@ -138,7 +138,8 @@ fn interete_exp(ctx: &mut Context, exp: Exp) -> ExpResult {
 }
 
 fn interprete_run(ctx: &mut Context, code: Value) -> ExpResult {
-    let code = code.to_list().join(" ");
+    let code: Vec<String> = code.try_into().expect("Expect List!");
+    let code = code.join(" ");
     interete(ctx, &mut Unsee::wrap(code.split(' ')))
 }
 
@@ -216,7 +217,7 @@ fn interpretr_call(ctx: &mut Context, pr: String, args: Vec<Exp>) -> ExpResult {
         "hideturtle" | "ht" => println!("Hide the turtle!"),
         "showturtle" | "st" => println!("Show the turtle!"),
         "pick" => {
-            let vs: Vec<String> = vals.pop_front().unwrap().to_list();
+            let vs: Vec<String> = vals.pop_front().unwrap().try_into().expect("Expect List!");
             return ExpResult::Outcome(Value::Str(
                 vs.choose(&mut rand::thread_rng()).unwrap().clone(),
             ));
@@ -231,8 +232,8 @@ fn interpretr_call(ctx: &mut Context, pr: String, args: Vec<Exp>) -> ExpResult {
             return ExpResult::Outcome(Value::Num(rand::thread_rng().gen_range(0..n) as f32));
         }
         "sentence" => {
-            let mut l1 = vals.pop_front().unwrap().to_list();
-            let mut l2 = vals.pop_front().unwrap().to_list();
+            let mut l1: Vec<String> = vals.pop_front().unwrap().try_into().expect("Expect List!");
+            let mut l2: Vec<String> = vals.pop_front().unwrap().try_into().expect("Expect List!");
             l1.append(&mut l2);
             return ExpResult::Outcome(Value::List(l1));
         }

@@ -13,16 +13,6 @@ pub enum Value {
     Void,
 }
 
-impl Value {
-    pub fn to_list(self) -> Vec<String> {
-        if let List(s) = self {
-            s
-        } else {
-            panic!("Expect list!")
-        }
-    }
-}
-
 impl Sub for Value {
     type Output = Value;
     fn sub(self, rhs: Value) -> Value {
@@ -83,6 +73,23 @@ impl TryFrom<Value> for bool {
             Ok(b)
         } else {
             Err("Type error: It is not a boolean!".to_string())
+        }
+    }
+}
+
+impl From<Vec<String>> for Value {
+    fn from(value: Vec<String>) -> Value {
+        List(value)
+    }
+}
+
+impl TryFrom<Value> for Vec<String> {
+    type Error = String;
+    fn try_from(v: Value) -> Result<Self, String> {
+        if let List(l) = v {
+            Ok(l)
+        } else {
+            Err("Type error: It is not a list!".to_string())
         }
     }
 }

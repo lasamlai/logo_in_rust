@@ -143,7 +143,7 @@ fn interprete_run(ctx: &mut Context, code: Value) -> ExpResult {
 }
 
 fn interpretr_proc(ctx: &mut Context, proc: Procedure, vals: VecDeque<Value>) -> ExpResult {
-    let argv: Vec<String> = proc.get_argv();
+    let argv: Vec<String> = proc.get_argv().into_iter().map(str::to_owned).collect();
     let save = ctx.keep_values_out_of_context(argv.clone());
 
     zip(argv, vals).for_each(|(name, val)| {
@@ -294,8 +294,9 @@ fn interete<'a, T: Iterator<Item = &'a str>>(
         match parse_statement(&ctx.signs, iter) {
             None => return ExpResult::Outcome(Value::Void),
             Some(Stat::ProcDef(proc)) => {
-                ctx.signs.insert(proc.get_name(), proc.signature());
-                ctx.procs.insert(proc.get_name(), proc);
+                ctx.signs
+                    .insert(proc.get_name().to_owned(), proc.signature());
+                ctx.procs.insert(proc.get_name().to_owned(), proc);
             }
             Some(Stat::Exp(e)) => match interete_exp(ctx, e) {
                 ExpResult::Outcome(Value::Void) => continue,

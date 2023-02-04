@@ -183,16 +183,16 @@ pub struct Procedure {
 }
 
 impl Procedure {
-    pub fn get_name(&self) -> String {
-        self.name.clone()
+    pub fn get_name(&self) -> &str {
+        &self.name
     }
 
     pub fn get_body(&self) -> Vec<&str> {
         self.body.iter().map(AsRef::as_ref).collect()
     }
 
-    pub fn get_argv(&self) -> Vec<String> {
-        self.vars.clone()
+    pub fn get_argv(&self) -> Vec<&str> {
+        self.vars.iter().map(AsRef::as_ref).collect()
     }
 
     pub fn signature(&self) -> usize {

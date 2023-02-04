@@ -179,7 +179,7 @@ fn parse_expr<'a, T: Iterator<Item = &'a str>>(
 pub struct Procedure {
     name: String,
     vars: Vec<String>,
-    body: String,
+    body: Vec<String>,
 }
 
 impl Procedure {
@@ -187,8 +187,8 @@ impl Procedure {
         self.name.clone()
     }
 
-    pub fn get_body(&self) -> String {
-        self.body.clone()
+    pub fn get_body(&self) -> Vec<&str> {
+        self.body.iter().map(AsRef::as_ref).collect()
     }
 
     pub fn get_argv(&self) -> Vec<String> {
@@ -214,7 +214,7 @@ fn procedure_args<'a, T: Iterator<Item = &'a str>>(iter: &mut Unsee<&'a str, T>)
     vars
 }
 
-fn procedure_body<'a, T: Iterator<Item = &'a str>>(iter: &mut Unsee<&'a str, T>) -> String {
+fn procedure_body<'a, T: Iterator<Item = &'a str>>(iter: &mut Unsee<&'a str, T>) -> Vec<String> {
     let mut body = vec![];
     loop {
         match iter.next() {
@@ -223,7 +223,7 @@ fn procedure_body<'a, T: Iterator<Item = &'a str>>(iter: &mut Unsee<&'a str, T>)
             Some(txt) => body.push(txt.to_string()),
         }
     }
-    body.join(" ")
+    body
 }
 
 fn parse_procedure<'a, T: Iterator<Item = &'a str>>(iter: &mut Unsee<&'a str, T>) -> Procedure {

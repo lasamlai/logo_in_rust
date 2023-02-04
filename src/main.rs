@@ -15,16 +15,9 @@ fn main() {
     println!("File: {}", file_path);
 
     let contents = fs::read_to_string(file_path).expect("Should have been able to read the file");
-    let data = match santiago::lexer::lex(&lexer_rules(), &contents) {
-        Ok(lexemes) => lexemes
-            .into_iter()
-            .map(|r| r.raw.clone())
-            .collect::<Vec<String>>()
-            .join(" "),
-        Err(e) => {
-            panic!("{}", e);
-        }
-    };
+    let lexemes =
+        santiago::lexer::lex(&lexer_rules(), &contents).unwrap_or_else(|e| panic!("{}", e));
+    let data: Vec<&str> = lexemes.iter().map(|r| r.raw.as_ref()).collect();
     let image = inter(data);
 
     svg::save("image.svg", &image).unwrap();

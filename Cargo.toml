@@ -1,5 +1,5 @@
 [package]
-name = "list7_logo"
+name = "logo"
 version = "0.1.0"
 edition = "2021"
 
@@ -10,3 +10,7 @@ svg = "0.12.1"
 regex = "1.7.0"
 santiago = "*"
 rand = "*"
+
+[dev-dependencies]
+assert_cmd = "*"
+predicates = "*"

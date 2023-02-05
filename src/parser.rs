@@ -98,10 +98,7 @@ impl ExpParser {
     }
 }
 
-fn parse_expr<'a, T: Iterator<Item = &'a str>>(
-    procs: &HashMap<String, usize>,
-    iter: &mut Unsee<&'a str, T>,
-) -> Exp {
+fn parse_expr(procs: &HashMap<String, usize>, iter: &mut Unsee<&str>) -> Exp {
     let mut parser = ExpParser::new();
     loop {
         match iter.next() {
@@ -200,7 +197,7 @@ impl Procedure {
     }
 }
 
-fn procedure_args<'a, T: Iterator<Item = &'a str>>(iter: &mut Unsee<&'a str, T>) -> Vec<String> {
+fn procedure_args(iter: &mut Unsee<&str>) -> Vec<String> {
     let mut vars = vec![];
     loop {
         let txt = iter.next().unwrap();
@@ -214,7 +211,7 @@ fn procedure_args<'a, T: Iterator<Item = &'a str>>(iter: &mut Unsee<&'a str, T>)
     vars
 }
 
-fn procedure_body<'a, T: Iterator<Item = &'a str>>(iter: &mut Unsee<&'a str, T>) -> Vec<String> {
+fn procedure_body(iter: &mut Unsee<&str>) -> Vec<String> {
     let mut body = vec![];
     loop {
         match iter.next() {
@@ -226,7 +223,7 @@ fn procedure_body<'a, T: Iterator<Item = &'a str>>(iter: &mut Unsee<&'a str, T>)
     body
 }
 
-fn parse_procedure<'a, T: Iterator<Item = &'a str>>(iter: &mut Unsee<&'a str, T>) -> Procedure {
+fn parse_procedure(iter: &mut Unsee<&str>) -> Procedure {
     let name = iter.next().unwrap().to_string();
     let vars = procedure_args(iter);
     let body = procedure_body(iter);
@@ -238,10 +235,7 @@ pub enum Stat {
     Exp(Exp),
 }
 
-pub fn parse_statement<'a, T: Iterator<Item = &'a str>>(
-    procs: &HashMap<String, usize>,
-    iter: &mut Unsee<&'a str, T>,
-) -> Option<Stat> {
+pub fn parse_statement(procs: &HashMap<String, usize>, iter: &mut Unsee<&str>) -> Option<Stat> {
     match iter.next() {
         None => None,
         Some("to") | Some("TO") | Some("To") => {

@@ -1,19 +1,13 @@
-pub struct Unsee<Item, T>
-where
-    T: Iterator<Item = Item>,
-{
+pub struct Unsee<'a, Item> {
     stack: Vec<Item>,
-    iter: T,
+    iter: Box<dyn Iterator<Item = Item> + 'a>,
 }
 
-impl<Item, T> Unsee<Item, T>
-where
-    T: Iterator<Item = Item>,
-{
-    pub fn wrap(iter: T) -> Unsee<Item, T> {
+impl<'a, Item> Unsee<'a, Item> {
+    pub fn wrap(iter: impl Iterator<Item = Item> + 'a) -> Unsee<'a, Item> {
         Unsee {
             stack: vec![],
-            iter,
+            iter: Box::new(iter),
         }
     }
 
@@ -22,10 +16,7 @@ where
     }
 }
 
-impl<Item, T> Iterator for Unsee<Item, T>
-where
-    T: Iterator<Item = Item>,
-{
+impl<'a, Item> Iterator for Unsee<'a, Item> {
     type Item = Item;
 
     fn next(&mut self) -> Option<Item> {

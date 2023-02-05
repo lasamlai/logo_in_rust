@@ -139,7 +139,8 @@ fn interete_exp(ctx: &mut Context, exp: Exp) -> ExpResult {
 
 fn interprete_run(ctx: &mut Context, code: Value) -> ExpResult {
     let code: Vec<String> = code.try_into().expect("Expect List!");
-    interete(ctx, &mut Unsee::wrap(code.iter().map(AsRef::as_ref)))
+    let mut unsee = Unsee::wrap(code.iter().map(AsRef::as_ref));
+    interete(ctx, &mut unsee)
 }
 
 fn interpretr_proc(ctx: &mut Context, proc: Procedure, vals: VecDeque<Value>) -> ExpResult {
@@ -286,10 +287,7 @@ fn interpretr_call(ctx: &mut Context, pr: String, args: Vec<Exp>) -> ExpResult {
     ExpResult::Outcome(Value::Void)
 }
 
-fn interete<'a, T: Iterator<Item = &'a str>>(
-    ctx: &mut Context,
-    iter: &mut Unsee<&'a str, T>,
-) -> ExpResult {
+fn interete(ctx: &mut Context, iter: &mut Unsee<&str>) -> ExpResult {
     loop {
         match parse_statement(&ctx.signs, iter) {
             None => return ExpResult::Outcome(Value::Void),

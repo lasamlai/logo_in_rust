@@ -95,8 +95,8 @@ impl TryFrom<Value> for Vec<String> {
 impl Display for Value {
     fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
         match self {
-            Str(s) => formatter.write_fmt(format_args!("{}", s)),
-            Num(n) => formatter.write_fmt(format_args!("{}", n)),
+            Str(s) => formatter.write_fmt(format_args!("{s}")),
+            Num(n) => formatter.write_fmt(format_args!("{n}")),
             List(l) => formatter.write_fmt(format_args!("[ {} ]", l.join(" "))),
             Void => formatter.write_fmt(format_args!("Void")),
         }

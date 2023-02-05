@@ -280,7 +280,7 @@ fn interpretr_call(ctx: &mut Context, pr: String, args: Vec<Exp>) -> ExpResult {
                 .procs
                 .get(s)
                 .cloned()
-                .unwrap_or_else(|| panic!("Unknown command: {}", s));
+                .unwrap_or_else(|| panic!("Unknown command: {s}"));
             return interpretr_proc(ctx, proc, vals);
         }
     };
@@ -298,7 +298,7 @@ fn interete(ctx: &mut Context, iter: &mut Unsee<&str>) -> ExpResult {
             }
             Some(Stat::Exp(e)) => match interete_exp(ctx, e) {
                 ExpResult::Outcome(Value::Void) => continue,
-                ExpResult::Outcome(v) => panic!("Don't know what to do with {}", v),
+                ExpResult::Outcome(v) => panic!("Don't know what to do with {v}"),
                 ExpResult::Exit(v) => return ExpResult::Exit(v),
             },
         }
